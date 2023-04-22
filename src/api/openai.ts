@@ -23,11 +23,14 @@ export class OpenAI {
     });
     const openai = new OpenAIApi(configuration);
 
-    const completion = await openai.createChatCompletion({
-      model: 'gpt-3.5-turbo',
-      messages: ChatgptMessages,
-    });
-
-    return (completion.data.choices[0].message as ChatgptMessage) || undefined;
+    try {
+      const completion = await openai.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        messages: ChatgptMessages,
+      });
+      return (completion.data.choices[0].message as ChatgptMessage) || undefined;
+    } catch (error: any) {
+      throw error.response.data.error;
+    }
   }
 }

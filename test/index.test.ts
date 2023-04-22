@@ -39,9 +39,30 @@ describe('chatgptRequest', () => {
       },
     ]);
 
-    // expect the role to be either assistant
     expect(chatgptMessage?.role).toMatch('assistant');
-    // expect the content to be of type string
     expect(typeof chatgptMessage?.content).toBe('string');
+  });
+  it('throws an error with a specific error message when API key is invalid', async () => {
+    const openai = new OpenAI("fail" as string);
+    try {
+      await openai.chatgptRequest([
+        {
+          role: 'user',
+          content: 'When did ww2 happen?',
+        },
+      ]);
+    } catch (error: any) {
+      expect(error).toBeDefined();
+      expect(error.message).toContain("Incorrect API key");
+    }
+  });
+  it('throws an error with a specific error message when API key is invalid', async () => {
+    const openai = new OpenAI(process.env.OPENAI_API_KEY as string);
+    try {
+      await openai.chatgptRequest([]);
+    } catch (error: any) {
+      expect(error).toBeDefined();
+      expect(error.message).toContain("[] is too short");
+    }
   });
 });
