@@ -40,8 +40,8 @@ describe('chatgptRequest', () => {
     ]);
 
     // expect the role to be either assistant
-    expect(chatgptMessage?.role).toMatch("assistant");
+    expect(chatgptMessage?.role).toMatch('assistant');
     // expect the content to be of type string
-    expect(typeof chatgptMessage?.content).toBe("string");
+    expect(typeof chatgptMessage?.content).toBe('string');
   });
 });
