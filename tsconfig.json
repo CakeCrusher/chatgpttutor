@@ -3,5 +3,8 @@
   "include": ["src", "types"],
   "compilerOptions": {
     "module": "esnext",
+    "moduleResolution": "node",
+    "typeRoots": ["./node_modules/@types", "./types"],
+    // ... other options
   }
 }

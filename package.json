@@ -2,6 +2,7 @@
   "name": "chatgpttutor",
   "version": "0.1.0",
   "license": "MIT",
+  "type": "module",
   "author": "Sebastian Sosa",
   "main": "dist/index.js",
   "module": "dist/chatgpttutor.esm.js",
@@ -46,5 +47,19 @@
       "path": "dist/chatgpttutor.esm.js",
       "limit": "10 KB"
     }
-  ]
+  ],
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^8.2.4",
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/dotenv": "^8.2.0",
+    "dotenv": "^16.0.3",
+    "dts-cli": "^2.0.2",
+    "husky": "^8.0.3",
+    "size-limit": "^8.2.4",
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "openai": "^3.2.1"
+  }
 }
