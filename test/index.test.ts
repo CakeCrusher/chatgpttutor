@@ -43,7 +43,7 @@ describe('chatgptRequest', () => {
     expect(typeof chatgptMessage?.content).toBe('string');
   });
   it('throws an error with a specific error message when API key is invalid', async () => {
-    const openai = new OpenAI("fail" as string);
+    const openai = new OpenAI('fail' as string);
     try {
       await openai.chatgptRequest([
         {
@@ -53,7 +53,7 @@ describe('chatgptRequest', () => {
       ]);
     } catch (error: any) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("Incorrect API key");
+      expect(error.message).toContain('Incorrect API key');
     }
   });
   it('throws an error with a specific error message when API key is invalid', async () => {
@@ -62,7 +62,7 @@ describe('chatgptRequest', () => {
       await openai.chatgptRequest([]);
     } catch (error: any) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("[] is too short");
+      expect(error.message).toContain('[] is too short');
     }
   });
 });
