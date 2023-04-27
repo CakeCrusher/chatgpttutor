@@ -1,5 +1,7 @@
-import { sum } from '../src/index';
+// lint ignore this file
+
 import { OpenAI } from '../src/index';
+import { messageTransformer, sum } from '../src/utils';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -64,5 +66,46 @@ describe('chatgptRequest', () => {
       expect(error).toBeDefined();
       expect(error.message).toContain('[] is too short');
     }
+  });
+});
+
+// create a test to verify that a message is correctly transformed to a ChatgptMessage using messageTransformer. base it off of a message that is of type
+describe('messageTransformer', () => {
+  it('returns a ChatgptMessage from a dummy message', async () => {
+    const chatgptMessage = messageTransformer('When did ww2 happen?', true);
+
+    expect(chatgptMessage?.role).toMatch('user');
+    expect(typeof chatgptMessage?.content).toBe('string');
+  });
+  // now convert a conversation array of type {userId: string, message: string, uid: string} where the userId of "thisIsUser" is the user
+  it('returns a ChatgptMessages from a dummy message exchange', async () => {
+    // generatea fake exchange of {userId: string, message: string, uid: string}
+    const dummyMessages = [
+      {
+        userId: 'thisIsUser',
+        message: 'When did ww2 happen?',
+        uid: '1',
+      },
+      {
+        userId: 'thisIsAssistant',
+        message: 'It happened in 1945',
+        uid: '2',
+      },
+      {
+        userId: 'thisIsUser',
+        message: 'I thought it happened in 1944',
+        uid: '3',
+      },
+    ];
+    const chatgptMessages = dummyMessages.map((message) =>
+      messageTransformer(message.message, message.userId === 'thisIsUser')
+    );
+
+    expect(chatgptMessages[0].role).toMatch('user');
+    expect(chatgptMessages[1].role).toMatch('assistant');
+    expect(chatgptMessages[2].role).toMatch('user');
+    expect(typeof chatgptMessages[0].content).toBe('string');
+    expect(typeof chatgptMessages[1].content).toBe('string');
+    expect(typeof chatgptMessages[2].content).toBe('string');
   });
 });
