@@ -15,6 +15,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
