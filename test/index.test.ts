@@ -1,7 +1,11 @@
 // lint ignore this file
 
-import { OpenAI } from '../src/index';
+import { PineconeClient } from '@pinecone-database/pinecone';
+import { QueryResponse } from '@pinecone-database/pinecone/dist/pinecone-generated-ts-fetch';
+
+import { OpenAI, Pinecone } from '../src/index';
 import { messageTransformer, sum } from '../src/utils';
+import { TextEmbedding } from '../src/api/pinecone';
 
 import dotenv from 'dotenv';
 dotenv.config();
@@ -108,4 +112,122 @@ describe('messageTransformer', () => {
     expect(typeof chatgptMessages[1].content).toBe('string');
     expect(typeof chatgptMessages[2].content).toBe('string');
   });
+});
+
+// create a series of tests that test all of the functions within Pinecone class
+describe('Pinecone', () => {
+  const indexName = 'test-index-chatgpttutor';
+  let pineconeObj: Pinecone;
+  let pinecone: PineconeClient;
+  let embeddings: TextEmbedding[];
+  const texts = [
+    'When did ww2 happen?',
+    'Water is not an element.',
+    'It is raining outside, what element is it raining?',
+  ];
+
+  beforeEach(async () => {
+    pineconeObj = new Pinecone(process.env.PINECONE_API_KEY as string);
+    pinecone = new PineconeClient();
+    try {
+      await pinecone.init({
+        environment: pineconeObj.getEnvironment(),
+        apiKey: pineconeObj.getApiKey(),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  });
+
+  it('can be instantiated', () => {
+    const pinecone = new Pinecone('test');
+    expect(pinecone).toBeInstanceOf(Pinecone);
+  });
+  it('can store an API key', () => {
+    const pinecone = new Pinecone(process.env.PINECONE_API_KEY as string);
+    expect(pinecone.getApiKey()).toEqual(
+      process.env.PINECONE_API_KEY as string
+    );
+  });
+  it('can create an index', async () => {
+    try {
+      await pineconeObj.createIndex(indexName);
+    } catch (error) {
+      console.error(error);
+    }
+    const indexes = await pinecone.listIndexes();
+    expect(indexes).toContain(indexName);
+    // wait 4 minutes for the index to be created
+    await new Promise((resolve) => setTimeout(resolve, 240000));
+  }, 250000);
+  it('can create an embedding', async () => {
+    const embeddingsRes = await pineconeObj.createEmbeddings(
+      texts,
+      process.env.OPENAI_API_KEY as string
+    );
+    // log the embeddings but only the first 4 ininstances of each embedding
+    console.log(
+      embeddingsRes.map((embedding) => embedding.embedding.slice(0, 4))
+    );
+    expect(embeddingsRes).toBeDefined();
+    // expect the embeddings to be of length 2
+    expect(embeddingsRes[0].text).toMatch(texts[0]);
+    embeddingsRes[0].embedding.slice(0, 4).forEach((num, idx) => {
+      expect(num).toBeCloseTo(
+        [-0.01806006, -0.03896703, 0.0041019595, -0.020690907][idx],
+        3
+      );
+    });
+    expect(embeddingsRes[1].text).toMatch(texts[1]);
+    embeddingsRes[1].embedding.slice(0, 4).forEach((num, idx) => {
+      expect(num).toBeCloseTo(
+        [-0.00075834506, 0.008689289, 0.0068192026, -0.011818692][idx],
+        3
+      );
+    });
+    embeddings = embeddingsRes;
+  });
+  it('can add embeddings to an index', async () => {
+    try {
+      await pineconeObj.upsertEmbeddings(indexName, embeddings);
+    } catch (error) {
+      console.error(error);
+    }
+    const index = await pinecone.Index(indexName);
+    const queryText = 'Is water on the periodic table?';
+    const embeddingsRes = await pineconeObj.createEmbeddings(
+      [queryText],
+      process.env.OPENAI_API_KEY as string
+    );
+    const queryEmbedding = embeddingsRes[0].embedding;
+    const queryRequest = {
+      vector: queryEmbedding,
+      topK: 2,
+      includeValues: true,
+      includeMetadata: true,
+    };
+    let queryResults: QueryResponse | undefined;
+    console.log('pre queryResults');
+    try {
+      queryResults = await index.query({ queryRequest });
+    } catch (error) {
+      console.error('QUERY ERROR: ', error);
+    }
+
+    expect(queryResults).toBeDefined();
+    expect(queryResults!.matches).toBeDefined();
+    expect(queryResults!.matches![0].id).toEqual(texts[1]);
+    expect(queryResults!.matches![1].id).toEqual(texts[2]);
+  });
+
+  it('can delete an index', async () => {
+    try {
+      await pineconeObj.deleteIndex(indexName);
+    } catch (error) {
+      console.error(error);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    const indexesAfterDelete = await pinecone.listIndexes();
+    expect(indexesAfterDelete).not.toContain(indexName);
+  }, 20000);
 });

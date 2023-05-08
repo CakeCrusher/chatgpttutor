@@ -1,2 +1,2 @@
-export { OpenAI } from './api/index';
+export { OpenAI, Pinecone } from './api/index';
 export * as utils from './utils/index';
