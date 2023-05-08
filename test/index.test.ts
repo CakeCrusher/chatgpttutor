@@ -118,7 +118,7 @@ describe('messageTransformer', () => {
 describe('Pinecone', () => {
   const indexName = 'test-index-chatgpttutor';
   let pineconeObj: Pinecone;
-  let pinecone: PineconeClient;
+  let pinecone: any;
   let embeddings: TextEmbedding[];
   const texts = [
     'When did ww2 happen?',
