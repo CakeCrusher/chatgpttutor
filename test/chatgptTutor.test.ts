@@ -108,5 +108,35 @@ describe('ChatgptTutor', () => {
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
     });
+    it('should generate a response from a chatTransformer without a pre-generated chatTransformer', async () => {
+      const messages = [
+        {
+          id: 'SuperGuy678',
+          text: testPrompt,
+          sender_id: 'mainGyu',
+          uid: '12345',
+        },
+      ];
+      expect(chatgptTutor.chatTransformer).toBeUndefined();
+      // getting first response and generating messateTransformer
+      const firstResponse = await chatgptTutor.generateResponse(
+        messages,
+        messageTransformMockData.aiAssistantId
+      );
+      expect(chatgptTutor.chatTransformer).toBeTruthy();
+      const firstResponseJson = JSON.parse(firstResponse as string);
+      expect(firstResponseJson.greeting).toBeTruthy();
+      expect(typeof firstResponseJson.greeting).toBe('string');
+
+      // getting second response
+      const secondResponse = await chatgptTutor.generateResponse(
+        messages,
+        messageTransformMockData.aiAssistantId
+      );
+      expect(chatgptTutor.chatTransformer).toBeTruthy();
+      const secondResponseJson = JSON.parse(secondResponse as string);
+      expect(secondResponseJson.greeting).toBeTruthy();
+      expect(typeof secondResponseJson.greeting).toBe('string');
+    }, 15000);
   });
 });

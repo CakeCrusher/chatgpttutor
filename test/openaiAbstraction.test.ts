@@ -24,11 +24,13 @@ describe('OpenaiAbstraction', () => {
 
       openaiAbstraction.initializeOpenaiAbstraction(openaiApiKey);
 
-      expect(chatgptTutor.openaiClient).toBeInstanceOf(OpenAIApi);
-      expect(chatgptTutor.openaiClient.configuration).toBeInstanceOf(
+      expect(openaiAbstraction.openaiClient).toBeInstanceOf(OpenAIApi);
+      expect(openaiAbstraction.openaiClient.configuration).toBeInstanceOf(
         Configuration
       );
-      expect(chatgptTutor.openaiClient.configuration.apiKey).toBe(openaiApiKey);
+      expect(openaiAbstraction.openaiClient.configuration.apiKey).toBe(
+        openaiApiKey
+      );
     });
   });
 
