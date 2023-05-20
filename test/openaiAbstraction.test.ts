@@ -18,6 +18,18 @@ describe('OpenaiAbstraction', () => {
       expect(openaiAbstraction.openaiClient).toBeDefined();
       expect(openaiAbstraction.openaiClient).toBeInstanceOf(OpenAIApi);
     });
+    it('should create a valid OpenAiApi client with the provided API key', () => {
+      const openaiAbstraction = new OpenaiAbstraction();
+      const openaiApiKey = process.env.OPENAI_API_KEY as string;
+
+      openaiAbstraction.initializeOpenaiAbstraction(openaiApiKey);
+
+      expect(chatgptTutor.openaiClient).toBeInstanceOf(OpenAIApi);
+      expect(chatgptTutor.openaiClient.configuration).toBeInstanceOf(
+        Configuration
+      );
+      expect(chatgptTutor.openaiClient.configuration.apiKey).toBe(openaiApiKey);
+    });
   });
 
   describe('basicChatgptRequest', () => {

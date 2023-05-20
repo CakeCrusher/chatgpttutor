@@ -1,16 +1,15 @@
 import { generateMessageTransformerPrompt } from './utils/prompts';
-import { generatedMessageTransformerParser } from './utils/generationParsers';
-import { basicChatgptRequest, chatgptErrorResolver } from './utils/openaiApi';
+import { generatedMessageTransformerParser } from './utils/parsers';
 import { OpenaiAbstraction } from './OpenaiAbstraction';
 
 export class ChatgptTutor extends OpenaiAbstraction {
-  pineconeApiKey: string;
-  chatTransformer: string | object;
+  pineconeApiKey: string | undefined;
+  chatTransformer: GeneratedTransformerFunction | undefined;
 
   constructor() {
     super();
-    this.pineconeApiKey = '';
-    this.chatTransformer = '';
+    this.pineconeApiKey = undefined;
+    this.chatTransformer = undefined;
   }
 
   initializeChatgptTutor(openaiApiKey: string, pineconeApiKey: string): void {
@@ -18,14 +17,29 @@ export class ChatgptTutor extends OpenaiAbstraction {
     this.pineconeApiKey = pineconeApiKey;
   }
 
-  generateResponse(messages: any[], aiAssistantId: string): ChatgptMessage[] {
-    // Implementation of generateResponse method goes here
-    return [];
-  }
+  async generateResponse(
+    messages: any[],
+    aiAssistantId: string
+  ): Promise<string> {
+    if (!this.chatTransformer) {
+      const messageTransformerObj = await this.generateMessageTransformer(
+        messages
+      );
+      console.log(
+        'This is you generated message transformer object:\n',
+        messageTransformerObj
+      );
+    }
+    const transformedMessages: ChatgptMessage[] = messages.map(
+      (message: any) =>
+        this.chatTransformer?.(message, aiAssistantId) as ChatgptMessage
+    );
 
-  generateMessageParser(messages: any[]): string {
-    // Implementation of generateMessageParser method goes here
-    return '';
+    const completion = await this.openaiClient.createChatCompletion({
+      model: 'gpt-3.5-turbo',
+      messages: transformedMessages,
+    });
+    return completion.data.choices[0]?.message?.content;
   }
 
   async generateMessageTransformer(messages: any[]): Promise<string> {
@@ -34,7 +48,8 @@ export class ChatgptTutor extends OpenaiAbstraction {
       stringifiedMessageInputInstance
     );
 
-    const generatedString = await this.basicChatgptRequest(prompt);
+    // first attempt at generating message transformer
+    let generatedString = await this.basicChatgptRequest(prompt);
     if (!generatedString) {
       throw new Error('Failed to generate message parser');
     }
@@ -46,12 +61,16 @@ export class ChatgptTutor extends OpenaiAbstraction {
 
       this.chatTransformer = generatedTransformerFunction;
     } catch (error: any) {
+      // second attempt to generate message transformer with chatgptErrorResolver
       console.warn(
         'Failed to generate first transformer function with error:',
         error
       );
       try {
-        const truncatedError = error.toString().substring(0, 200);
+        let truncatedError = error.toString().substring(0, 200);
+        if (error.message) {
+          truncatedError = error.message.substring(0, 200);
+        }
         const fixedGeneratedString = await this.chatgptErrorResolver(
           prompt,
           generatedString,
@@ -64,6 +83,7 @@ export class ChatgptTutor extends OpenaiAbstraction {
           generatedMessageTransformerParser(fixedGeneratedString);
 
         this.chatTransformer = generatedTransformerFunction;
+        generatedString = fixedGeneratedString;
       } catch (error: any) {
         console.error(error);
         throw new Error(
