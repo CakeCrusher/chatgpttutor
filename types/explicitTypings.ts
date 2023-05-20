@@ -3,3 +3,8 @@ export enum ChatgptRoleEnum {
   ASSISTANT = 'assistant',
   SYSTEM = 'system',
 }
+
+export const ChatgptMessageTypeInString = `{
+  role: ChatgptRole;
+  content: string;
+}`;
