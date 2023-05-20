@@ -30,3 +30,12 @@ export const errorResolutionPrompt = (error: string) => {
   \`\`\`
   `
 }
+
+export const testPrompt = `
+Your task is to produce a greeting in the following JSON format:
+\`\`\`
+{
+  "greeting": GREETING_STRING_HERE
+}
+\`\`\`
+`
