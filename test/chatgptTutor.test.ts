@@ -86,10 +86,6 @@ describe('ChatgptTutor', () => {
     });
 
     it('should generate a response from a pre-generated chatTransformer', async () => {
-      console.log(
-        'messageTransformMockData.generatedTransformerString',
-        messageTransformMockData.generatedTransformerString
-      );
       chatgptTutor.chatTransformer = generatedMessageTransformerParser(
         messageTransformMockData.generatedTransformerString
       );
@@ -106,8 +102,6 @@ describe('ChatgptTutor', () => {
         messages,
         messageTransformMockData.aiAssistantId
       );
-
-      console.log('response', response);
 
       const responseJson = JSON.parse(response as string);
       expect(responseJson.greeting).toBeTruthy();

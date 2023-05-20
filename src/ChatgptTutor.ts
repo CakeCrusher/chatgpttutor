@@ -53,7 +53,6 @@ export class ChatgptTutor extends OpenaiAbstraction {
     if (!generatedString) {
       throw new Error('Failed to generate message parser');
     }
-    console.log('generatedString:\n', generatedString);
 
     try {
       const generatedTransformerFunction: GeneratedTransformerFunction =
