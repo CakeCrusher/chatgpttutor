@@ -68,7 +68,6 @@ describe('OpenaiAbstraction', () => {
         result,
         error
       );
-      console.log('correctedResponse', correctedResponse);
       expect(correctedResponse).toBeTruthy();
       const responseJson = JSON.parse(correctedResponse as string);
       expect(responseJson.greeting).toBeTruthy();
