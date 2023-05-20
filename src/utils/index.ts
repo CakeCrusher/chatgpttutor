@@ -1,2 +1,2 @@
-export { messageTransformer } from './messageTransformer';
+// export { messageTransformer } from './messageTransformer';
 export { sum } from './arithmetic';
