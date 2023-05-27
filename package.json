@@ -12,7 +12,7 @@
   "scripts": {
     "analyze": "size-limit --why",
     "build": "dts build",
-    "lint": "dts lint --fix",
+    "lint": "dts lint",
     "prepare": "dts build",
     "size": "size-limit",
     "start": "dts watch",
@@ -65,6 +65,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "chromadb": "^1.5.0",
     "openai": "^3.2.1"
   }
 }

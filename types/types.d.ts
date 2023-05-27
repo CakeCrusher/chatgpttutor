@@ -19,3 +19,14 @@ declare module 'openai' {
   const Configuration: any;
   export { OpenAIApi, Configuration };
 }
+
+type CourseSegment = {
+  content: string;
+  positionInCourse: number;
+};
+
+type UpsertInfo = {
+  ids: string[];
+  metadatas: any[];
+  documents: string[];
+};
