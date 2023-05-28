@@ -1,6 +1,7 @@
 export const generatedMessageTransformerParser = (
   generatedString: string
 ): GeneratedTransformerFunction => {
+  generatedString = markdownToJsonParser(generatedString);
   const generatedObj: { javascriptFunction: string } =
     JSON.parse(generatedString);
 
@@ -29,4 +30,16 @@ export const positionInCourseParser = (positionInCourse: number[]): number => {
   const positionInCourseNumber = parseInt(positionInCourseString.join(''), 10);
 
   return positionInCourseNumber;
+};
+
+export const markdownToJsonParser = (markdownString: string): string => {
+  const splitMarkdownString = markdownString.split('```');
+  if (splitMarkdownString.length > 1) {
+    // if splitMarkdownString[1] starts with the string "json" delete it
+    if (splitMarkdownString[1].startsWith('json')) {
+      return splitMarkdownString[1].substring(4);
+    }
+    return splitMarkdownString[1];
+  }
+  return splitMarkdownString[0];
 };

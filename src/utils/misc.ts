@@ -35,3 +35,17 @@ export const batchString = (
 
   return batchedStrings;
 };
+
+export const functionRepeater = async (
+  func: Function,
+  times: number
+): Promise<any> => {
+  let result;
+  for (let i = 0; i < times; i++) {
+    result = await func();
+    if (result) {
+      return result;
+    }
+  }
+  return result;
+};
