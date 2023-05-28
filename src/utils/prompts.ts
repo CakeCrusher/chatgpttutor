@@ -39,3 +39,23 @@ Your task is to produce a greeting in the following JSON format:
 }
 \`\`\`
 `
+
+export const messageWithContent = (message: string, contents: string[]): string => {
+  // transform list of contents into an enumerated list string
+  const enumeratedContents = contents.map((content, index) => {
+    return `${index + 1}. ${content}`;
+  }).join('\n');
+
+  return `
+  Your task is to generate a response to the message delimited by triple backticks using the related content also delimited with triple backticks.
+  The related content is formatted in order of relevance.
+  Below is the related content:
+  \`\`\`
+  ${enumeratedContents}
+  \`\`\`
+  Below is the message:
+  \`\`\`
+  ${message}
+  \`\`\`
+  `
+}

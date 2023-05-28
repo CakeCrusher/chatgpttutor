@@ -1,8 +1,11 @@
 import dotenv from 'dotenv';
 
 import { Configuration, OpenAIApi } from 'openai';
-import { ChatgptTutor } from '../src/ChatgptTutor';
-import { messageTransformMockData } from '../src/utils/mockData';
+import { ChatgptTutor, ChromaAbstraction } from '../src/index';
+import {
+  messageTransformMockData,
+  chromaAbstractionMockData,
+} from '../src/utils/mockData';
 import { generatedMessageTransformerParser } from '../src/utils/parsers';
 import { testPrompt } from '../src/utils/prompts';
 
@@ -20,6 +23,9 @@ describe('ChatgptTutor', () => {
       expect(chatgptTutor.openaiApiKey).toBe(openaiApiKey);
       expect(chatgptTutor.pineconeApiKey).toBe(pineconeApiKey);
       expect(chatgptTutor.openaiClient).toBeDefined();
+      expect(chatgptTutor.vectorDb).toBeInstanceOf(ChromaAbstraction);
+      expect(chatgptTutor.vectorDb.collection).toBeDefined();
+      expect(chatgptTutor.vectorDb.collection!.name).toBe('course-collection');
     });
 
     it('should create a valid OpenAIApi client with the provided API key', () => {
@@ -71,18 +77,18 @@ describe('ChatgptTutor', () => {
       expect(transformedMessages).toEqual(
         messageTransformMockData.transformedMessages
       );
-    }, 15000);
+    }, 20000);
   });
 
   describe('generateResponse', () => {
     let chatgptTutor: ChatgptTutor;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       chatgptTutor = new ChatgptTutor();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
+      await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
     });
 
     it('should generate a response from a pre-generated chatTransformer', async () => {
@@ -137,6 +143,32 @@ describe('ChatgptTutor', () => {
       const secondResponseJson = JSON.parse(secondResponse as string);
       expect(secondResponseJson.greeting).toBeTruthy();
       expect(typeof secondResponseJson.greeting).toBe('string');
-    }, 15000);
+    }, 20000);
+    it('should respond with course replated content', async () => {
+      chatgptTutor.chatTransformer = (
+        message: ChatgptMessage,
+        aiAssistantId: string
+      ) => message;
+      await chatgptTutor.vectorDb!.addCourseSegment(
+        chromaAbstractionMockData.contentInSequence,
+        chromaAbstractionMockData.positionInCourseToAddSequence,
+        chromaAbstractionMockData.batchSize
+      );
+      const messages = [
+        {
+          role: 'user',
+          content:
+            'Please print in JSON format the largest number passed in relevant content. The response should be in this format: { "largestNumber": NUMBER_HERE }. Please only respond with the JSON object.',
+        },
+      ];
+      const response = await chatgptTutor.generateResponse(
+        messages,
+        messageTransformMockData.aiAssistantId,
+        chromaAbstractionMockData.positionInCourseQuery,
+        5
+      );
+      const responseJson = JSON.parse(response as string);
+      expect(responseJson.largestNumber).toBe(22);
+    }, 20000);
   });
 });
