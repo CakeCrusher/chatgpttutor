@@ -31,7 +31,7 @@ export class ChromaAbstraction {
       throw new Error('Course collection not initialized');
     }
 
-    const overlap = Math.max(5, Math.ceil(batchSize * 0.2));
+    const overlap = Math.max(4, Math.ceil(batchSize * 0.2));
     const upsertInfo: UpsertInfo = {
       ids: [],
       metadatas: [],
@@ -52,7 +52,7 @@ export class ChromaAbstraction {
         );
         upsertInfo.ids.push(parsedCurrentPositionInCourse.toString());
         upsertInfo.metadatas.push({
-          positionInCourse: currentPositionInCourse,
+          positionInCourse: parsedCurrentPositionInCourse,
         });
         upsertInfo.documents.push(courseSegments[j]);
         currentPosition += 1;
@@ -76,10 +76,9 @@ export class ChromaAbstraction {
     let whereCondition = {};
     if (positionInCourse) {
       whereCondition = {
-        metadata: { $lt: positionInCourseParser(positionInCourse) },
+        positionInCourse: { $lte: positionInCourseParser(positionInCourse) },
       };
     }
-
     const results = await this.courseCollection.query({
       n_results: amount,
       query_text: [query],
