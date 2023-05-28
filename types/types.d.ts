@@ -42,4 +42,6 @@ type VectorDb = {
     amount: number = 3,
     positionInCourse: number[] | null = null
   ) => Promise<string[] | null>;
-}
+  chromaClient: ChromaClient;
+  courseCollection: Collection;
+};

@@ -94,15 +94,18 @@ export class ChatgptTutor extends OpenaiAbstraction {
     } catch (error: any) {
       // second attempt to generate message transformer with chatgptErrorResolver
       console.warn(
-        'Failed to generate first transformer function with error:',
+        'Failed to generate first transformer function with generatedString:',
+        generatedString,
+        'and error:',
         error
       );
+      let fixedGeneratedString;
       try {
         let truncatedError = error.toString().substring(0, 200);
         if (error.message) {
           truncatedError = error.message.substring(0, 200);
         }
-        const fixedGeneratedString = await this.chatgptErrorResolver(
+        fixedGeneratedString = await this.chatgptErrorResolver(
           prompt,
           generatedString,
           truncatedError
@@ -116,7 +119,12 @@ export class ChatgptTutor extends OpenaiAbstraction {
         this.chatTransformer = generatedTransformerFunction;
         generatedString = fixedGeneratedString;
       } catch (error: any) {
-        console.error(error);
+        console.error(
+          'Failed to generate message transformer function with fixedGeneratedString:',
+          fixedGeneratedString,
+          'and error:',
+          error
+        );
         throw new Error(
           'Failed to generate message transformer function. Please create your own function that transforms a single message to be of type `ChatgptMessage`, then assign it to the property `chatTransformer`.'
         );

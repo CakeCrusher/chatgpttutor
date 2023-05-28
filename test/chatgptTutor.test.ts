@@ -13,19 +13,25 @@ dotenv.config();
 
 describe('ChatgptTutor', () => {
   describe('initializeChatgptTutor', () => {
-    it('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', () => {
+    it('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', async () => {
       const chatgptTutor = new ChatgptTutor();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
+      await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
 
       expect(chatgptTutor.openaiApiKey).toBe(openaiApiKey);
       expect(chatgptTutor.pineconeApiKey).toBe(pineconeApiKey);
       expect(chatgptTutor.openaiClient).toBeDefined();
+      expect(chatgptTutor.vectorDb).toBeDefined();
       expect(chatgptTutor.vectorDb).toBeInstanceOf(ChromaAbstraction);
-      expect(chatgptTutor.vectorDb.collection).toBeDefined();
-      expect(chatgptTutor.vectorDb.collection!.name).toBe('course-collection');
+      if (!chatgptTutor.vectorDb) {
+        throw new Error('vectorDb is undefined');
+      }
+      expect(chatgptTutor.vectorDb.courseCollection).toBeDefined();
+      expect(chatgptTutor.vectorDb.courseCollection.name).toBe(
+        'course-collection'
+      );
     });
 
     it('should create a valid OpenAIApi client with the provided API key', () => {
@@ -77,7 +83,7 @@ describe('ChatgptTutor', () => {
       expect(transformedMessages).toEqual(
         messageTransformMockData.transformedMessages
       );
-    }, 20000);
+    }, 30000);
   });
 
   describe('generateResponse', () => {
@@ -143,13 +149,17 @@ describe('ChatgptTutor', () => {
       const secondResponseJson = JSON.parse(secondResponse as string);
       expect(secondResponseJson.greeting).toBeTruthy();
       expect(typeof secondResponseJson.greeting).toBe('string');
-    }, 20000);
-    it('should respond with course replated content', async () => {
+    }, 30000);
+    it('should respond with course related content', async () => {
+      if (!chatgptTutor.vectorDb) {
+        throw new Error('vectorDb is undefined');
+      };
+
       chatgptTutor.chatTransformer = (
         message: ChatgptMessage,
         aiAssistantId: string
       ) => message;
-      await chatgptTutor.vectorDb!.addCourseSegment(
+      await chatgptTutor.vectorDb.addCourseSegment(
         chromaAbstractionMockData.contentInSequence,
         chromaAbstractionMockData.positionInCourseToAddSequence,
         chromaAbstractionMockData.batchSize
@@ -169,6 +179,6 @@ describe('ChatgptTutor', () => {
       );
       const responseJson = JSON.parse(response as string);
       expect(responseJson.largestNumber).toBe(22);
-    }, 20000);
+    }, 30000);
   });
 });
