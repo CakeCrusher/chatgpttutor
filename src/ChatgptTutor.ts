@@ -20,12 +20,16 @@ export class ChatgptTutor extends OpenaiAbstraction {
 
   async initializeChatgptTutor(
     openaiApiKey: string,
-    pineconeApiKey: string
+    pineconeApiKey: string,
+    collectionName: string = 'course-collection'
   ): Promise<void> {
     this.initializeOpenaiAbstraction(openaiApiKey);
     this.pineconeApiKey = pineconeApiKey;
     const chromaAbstraction = new ChromaAbstraction();
-    await chromaAbstraction.initializeChromaAbstraction(openaiApiKey);
+    await chromaAbstraction.initializeChromaAbstraction(
+      openaiApiKey,
+      collectionName
+    );
     this.vectorDb = chromaAbstraction;
   }
 
@@ -40,7 +44,7 @@ export class ChatgptTutor extends OpenaiAbstraction {
         messages
       );
       console.log(
-        'This is you generated message transformer object:\n',
+        'This is your generated message transformer object:\n',
         messageTransformerObj
       );
     }

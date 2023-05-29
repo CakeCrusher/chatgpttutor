@@ -11,7 +11,10 @@ export class ChromaAbstraction {
     this.courseCollection = undefined;
   }
 
-  async initializeChromaAbstraction(openaiApiKey: string, collectionName: string = 'course-collection'): Promise<void> {
+  async initializeChromaAbstraction(
+    openaiApiKey: string,
+    collectionName: string = 'course-collection'
+  ): Promise<void> {
     this.chromaClient = new ChromaClient();
     const embeddingFunction = new OpenAIEmbeddingFunction({
       openai_api_key: openaiApiKey,

@@ -17,6 +17,8 @@
     "size": "size-limit",
     "start": "dts watch",
     "test": "dts test",
+    "test:else" : "dts test --testPathIgnorePatterns=test/chatgptTutor.test.ts",
+    "test:chatgtpTutor": "dts test --testPathPattern=test/chatgptTutor.test.ts",
     "test-light": "yarn test --testNamePattern messageTransformer"
   },
   "husky": {

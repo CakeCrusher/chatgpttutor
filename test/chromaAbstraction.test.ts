@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { ChromaAbstraction } from '../src/ChromaAbstraction';
 import { chromaAbstractionMockData } from '../src/utils/mockData';
+import { functionRepeater } from '../src/utils/misc';
 
 dotenv.config();
 
@@ -50,20 +51,19 @@ describe('ChromaAbstraction', () => {
         throw new Error('chromaClient not defined');
       }
 
-      const queryResult = await chromaAbstraction.courseCollection.query({
-        n_results: 5,
-        query_text: ['one'], // does not matter
+      const queryResult = await chromaAbstraction.courseCollection.get({
+        where: {},
       });
 
       chromaAbstractionMockData.expectedBatchedDocuments.forEach(
         (expectedDocument) => {
-          expect(queryResult.documents[0]).toContainEqual(expectedDocument);
+          expect(queryResult.documents).toContain(expectedDocument);
         }
       );
 
       chromaAbstractionMockData.expectedBatchedMetadatas.forEach(
-        (expectedDocument) => {
-          expect(queryResult.metadatas[0]).toContainEqual(expectedDocument);
+        (expectedMetadata) => {
+          expect(queryResult.metadatas).toContainEqual(expectedMetadata);
         }
       );
     });
@@ -78,7 +78,7 @@ describe('ChromaAbstraction', () => {
       );
 
       // Query related course material
-      const query = 'numbers'; // does not matter
+      const query = '7 8 9'; // does not matter
       const amount = 5;
       const resultDocuments =
         await chromaAbstraction.queryRelatedCourseMaterial(

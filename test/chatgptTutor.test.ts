@@ -6,7 +6,10 @@ import {
   messageTransformMockData,
   chromaAbstractionMockData,
 } from '../src/utils/mockData';
-import { generatedMessageTransformerParser, markdownToJsonParser } from '../src/utils/parsers';
+import {
+  generatedMessageTransformerParser,
+  markdownToJsonParser,
+} from '../src/utils/parsers';
 import { testPrompt } from '../src/utils/prompts';
 import { functionRepeater } from '../src/utils/misc';
 
@@ -144,7 +147,6 @@ describe('ChatgptTutor', () => {
           messageTransformMockData.aiAssistantId
         );
       }, 3);
-      console.log('firstResponse: ', firstResponse);
       expect(chatgptTutor.chatTransformer).toBeTruthy();
       const firstResponseJson = JSON.parse(firstResponse as string);
       expect(firstResponseJson.greeting).toBeTruthy();
@@ -157,7 +159,6 @@ describe('ChatgptTutor', () => {
           messageTransformMockData.aiAssistantId
         );
       }, 3);
-      console.log('secondResponse: ', secondResponse);
       expect(chatgptTutor.chatTransformer).toBeTruthy();
       const secondResponseJson = JSON.parse(secondResponse as string);
       expect(secondResponseJson.greeting).toBeTruthy();
@@ -166,7 +167,7 @@ describe('ChatgptTutor', () => {
     it('should respond with course related content', async () => {
       if (!chatgptTutor.vectorDb) {
         throw new Error('vectorDb is undefined');
-      };
+      }
 
       chatgptTutor.chatTransformer = (
         message: ChatgptMessage,
@@ -190,7 +191,6 @@ describe('ChatgptTutor', () => {
         chromaAbstractionMockData.positionInCourseQuery,
         5
       );
-      console.log('max number response: ', response);
       const responseJson = JSON.parse(markdownToJsonParser(response) as string);
       expect(responseJson.largestNumber).toBe(22);
     }, 30000);
