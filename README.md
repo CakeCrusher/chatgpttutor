@@ -36,6 +36,7 @@ const messages = [
     uid: '12345',
   },
 ];
+// message transformation is currently inferred by ChatGPT
 const res: string = await chatgptTutor.generateResponse(
   messages,
   messageTransformMockData.aiAssistantId
