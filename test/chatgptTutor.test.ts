@@ -17,7 +17,7 @@ dotenv.config();
 
 describe('ChatgptTutor', () => {
   describe('initializeChatgptTutor', () => {
-    it('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', async () => {
+    test('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', async () => {
       const chatgptTutor = new ChatgptTutor();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       const pineconeApiKey = process.env.PINECONE_API_KEY as string;
@@ -38,7 +38,7 @@ describe('ChatgptTutor', () => {
       );
     });
 
-    it('should create a valid OpenAIApi client with the provided API key', () => {
+    test('should create a valid OpenAIApi client with the provided API key', () => {
       const chatgptTutor = new ChatgptTutor();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       const pineconeApiKey = process.env.PINECONE_API_KEY as string;
@@ -61,7 +61,7 @@ describe('ChatgptTutor', () => {
 
       chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
     });
-    it('should generate a valid message transformer function', async () => {
+    test('should generate a valid message transformer function', async () => {
       const stringifiedGeneratedFunctionObject =
         await chatgptTutor.generateMessageTransformer(
           messageTransformMockData.baseMessages
@@ -107,7 +107,7 @@ describe('ChatgptTutor', () => {
       });
     });
 
-    it('should generate a response from a pre-generated chatTransformer', async () => {
+    test('should generate a response from a pre-generated chatTransformer', async () => {
       chatgptTutor.chatTransformer = generatedMessageTransformerParser(
         messageTransformMockData.generatedTransformerString
       );
@@ -130,7 +130,7 @@ describe('ChatgptTutor', () => {
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
     });
-    it('should generate a response from a chatTransformer without a pre-generated chatTransformer', async () => {
+    test('should generate a response from a chatTransformer without a pre-generated chatTransformer', async () => {
       const messages = [
         {
           id: 'SuperGuy678',
@@ -164,7 +164,7 @@ describe('ChatgptTutor', () => {
       expect(secondResponseJson.greeting).toBeTruthy();
       expect(typeof secondResponseJson.greeting).toBe('string');
     }, 30000);
-    it('should respond with course related content', async () => {
+    test('should respond with course related content', async () => {
       if (!chatgptTutor.vectorDb) {
         throw new Error('vectorDb is undefined');
       }
