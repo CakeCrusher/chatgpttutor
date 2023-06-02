@@ -27,7 +27,9 @@ describe('ChromaAbstraction', () => {
     if (!chromaAbstraction.courseCollection) {
       throw new Error('chromaClient not defined');
     }
-    await chromaAbstraction.chromaClient.deleteCollection({name: chromaAbstraction.courseCollection.name});
+    await chromaAbstraction.chromaClient.deleteCollection({
+      name: chromaAbstraction.courseCollection.name,
+    });
   });
 
   describe('initializeChromaAbstraction', () => {

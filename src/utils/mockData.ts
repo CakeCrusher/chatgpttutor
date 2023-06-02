@@ -1,3 +1,15 @@
+const errorResolverResult = `{
+  "greeting"= "Hello, and welcome!"
+}`;
+
+const errorResolverError =
+  'Uncaught SyntaxError: Unexpected token = in JSON at position 11';
+
+export const openaiAbstractionMockData = {
+  errorResolverResult,
+  errorResolverError,
+};
+
 const baseMessages: any = [
   {
     id: 'SuperGuy678',
