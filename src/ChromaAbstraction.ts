@@ -5,16 +5,19 @@ import { batchString } from './utils/misc';
 export class ChromaAbstraction {
   chromaClient: ChromaClient | undefined;
   courseCollection: Collection | undefined;
+  collectionName: string | undefined;
 
   constructor() {
     this.chromaClient = undefined;
     this.courseCollection = undefined;
+    this.collectionName = undefined;
   }
 
   async initializeChromaAbstraction(
     openaiApiKey: string,
     collectionName: string = 'course-collection'
   ): Promise<void> {
+    this.collectionName = collectionName;
     this.chromaClient = new ChromaClient();
     const embeddingFunction = new OpenAIEmbeddingFunction({
       openai_api_key: openaiApiKey,

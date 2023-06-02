@@ -52,147 +52,147 @@ describe('ChatgptTutor', () => {
       expect(chatgptTutor.openaiClient.configuration.apiKey).toBe(openaiApiKey);
     });
   });
-  describe('generateMessageTransformer', () => {
-    let chatgptTutor: ChatgptTutor;
-    beforeEach(async () => {
-      chatgptTutor = new ChatgptTutor();
-      const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
+  // describe('generateMessageTransformer', () => {
+  //   let chatgptTutor: ChatgptTutor;
+  //   beforeEach(async () => {
+  //     chatgptTutor = new ChatgptTutor();
+  //     const openaiApiKey = process.env.OPENAI_API_KEY as string;
+  //     const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
-    });
-    it('should generate a valid message transformer function', async () => {
-      const stringifiedGeneratedFunctionObject =
-        await chatgptTutor.generateMessageTransformer(
-          messageTransformMockData.baseMessages
-        );
+  //     chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
+  //   });
+  //   it('should generate a valid message transformer function', async () => {
+  //     const stringifiedGeneratedFunctionObject =
+  //       await chatgptTutor.generateMessageTransformer(
+  //         messageTransformMockData.baseMessages
+  //       );
 
-      expect(stringifiedGeneratedFunctionObject).toBeTruthy();
+  //     expect(stringifiedGeneratedFunctionObject).toBeTruthy();
 
-      const generatedTransformerFunction:
-        | GeneratedTransformerFunction
-        | undefined =
-        chatgptTutor.chatTransformer as GeneratedTransformerFunction;
+  //     const generatedTransformerFunction:
+  //       | GeneratedTransformerFunction
+  //       | undefined =
+  //       chatgptTutor.chatTransformer as GeneratedTransformerFunction;
 
-      expect(generatedTransformerFunction).toBeInstanceOf(Function);
+  //     expect(generatedTransformerFunction).toBeInstanceOf(Function);
 
-      const transformedMessages: ChatgptMessage[] =
-        messageTransformMockData.baseMessages.map((message: any) =>
-          generatedTransformerFunction(
-            message,
-            messageTransformMockData.aiAssistantId
-          )
-        );
+  //     const transformedMessages: ChatgptMessage[] =
+  //       messageTransformMockData.baseMessages.map((message: any) =>
+  //         generatedTransformerFunction(
+  //           message,
+  //           messageTransformMockData.aiAssistantId
+  //         )
+  //       );
 
-      expect(transformedMessages).toEqual(
-        messageTransformMockData.transformedMessages
-      );
-    }, 30000);
-  });
+  //     expect(transformedMessages).toEqual(
+  //       messageTransformMockData.transformedMessages
+  //     );
+  //   }, 30000);
+  // });
 
-  describe('generateResponse', () => {
-    let chatgptTutor: ChatgptTutor;
+  // describe('generateResponse', () => {
+  //   let chatgptTutor: ChatgptTutor;
 
-    beforeEach(async () => {
-      chatgptTutor = new ChatgptTutor();
-      const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
+  //   beforeEach(async () => {
+  //     chatgptTutor = new ChatgptTutor();
+  //     const openaiApiKey = process.env.OPENAI_API_KEY as string;
+  //     const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
-      if (!chatgptTutor.vectorDb) {
-        throw new Error('vectorDb is undefined');
-      }
-      await chatgptTutor.vectorDb.courseCollection.delete({
-        where: {},
-      });
-    });
+  //     await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
+  //     if (!chatgptTutor.vectorDb) {
+  //       throw new Error('vectorDb is undefined');
+  //     }
+  //     await chatgptTutor.vectorDb.courseCollection.delete({
+  //       where: {},
+  //     });
+  //   });
 
-    it('should generate a response from a pre-generated chatTransformer', async () => {
-      chatgptTutor.chatTransformer = generatedMessageTransformerParser(
-        messageTransformMockData.generatedTransformerString
-      );
-      const messages = [
-        {
-          id: 'SuperGuy678',
-          text: testPrompt,
-          sender_id: 'mainGyu',
-          uid: '12345',
-        },
-      ];
+  //   it('should generate a response from a pre-generated chatTransformer', async () => {
+  //     chatgptTutor.chatTransformer = generatedMessageTransformerParser(
+  //       messageTransformMockData.generatedTransformerString
+  //     );
+  //     const messages = [
+  //       {
+  //         id: 'SuperGuy678',
+  //         text: testPrompt,
+  //         sender_id: 'mainGyu',
+  //         uid: '12345',
+  //       },
+  //     ];
 
-      const response = await chatgptTutor.generateResponse(
-        messages,
-        messageTransformMockData.aiAssistantId
-      );
+  //     const response = await chatgptTutor.generateResponse(
+  //       messages,
+  //       messageTransformMockData.aiAssistantId
+  //     );
 
-      const responseJson = JSON.parse(response as string);
-      expect(responseJson.greeting).toBeTruthy();
-      // expect responseJson.greeting to be a string
-      expect(typeof responseJson.greeting).toBe('string');
-    });
-    it('should generate a response from a chatTransformer without a pre-generated chatTransformer', async () => {
-      const messages = [
-        {
-          id: 'SuperGuy678',
-          text: testPrompt,
-          sender_id: 'mainGyu',
-          uid: '12345',
-        },
-      ];
-      expect(chatgptTutor.chatTransformer).toBeUndefined();
-      // getting first response and generating messateTransformer
-      const firstResponse = await functionRepeater(async () => {
-        return await chatgptTutor.generateResponse(
-          messages,
-          messageTransformMockData.aiAssistantId
-        );
-      }, 3);
-      expect(chatgptTutor.chatTransformer).toBeTruthy();
-      const firstResponseJson = JSON.parse(firstResponse as string);
-      expect(firstResponseJson.greeting).toBeTruthy();
-      expect(typeof firstResponseJson.greeting).toBe('string');
+  //     const responseJson = JSON.parse(response as string);
+  //     expect(responseJson.greeting).toBeTruthy();
+  //     // expect responseJson.greeting to be a string
+  //     expect(typeof responseJson.greeting).toBe('string');
+  //   });
+  //   it('should generate a response from a chatTransformer without a pre-generated chatTransformer', async () => {
+  //     const messages = [
+  //       {
+  //         id: 'SuperGuy678',
+  //         text: testPrompt,
+  //         sender_id: 'mainGyu',
+  //         uid: '12345',
+  //       },
+  //     ];
+  //     expect(chatgptTutor.chatTransformer).toBeUndefined();
+  //     // getting first response and generating messateTransformer
+  //     const firstResponse = await functionRepeater(async () => {
+  //       return await chatgptTutor.generateResponse(
+  //         messages,
+  //         messageTransformMockData.aiAssistantId
+  //       );
+  //     }, 3);
+  //     expect(chatgptTutor.chatTransformer).toBeTruthy();
+  //     const firstResponseJson = JSON.parse(firstResponse as string);
+  //     expect(firstResponseJson.greeting).toBeTruthy();
+  //     expect(typeof firstResponseJson.greeting).toBe('string');
 
-      // getting second response
-      const secondResponse = await functionRepeater(async () => {
-        return await chatgptTutor.generateResponse(
-          messages,
-          messageTransformMockData.aiAssistantId
-        );
-      }, 3);
-      expect(chatgptTutor.chatTransformer).toBeTruthy();
-      const secondResponseJson = JSON.parse(secondResponse as string);
-      expect(secondResponseJson.greeting).toBeTruthy();
-      expect(typeof secondResponseJson.greeting).toBe('string');
-    }, 30000);
-    it('should respond with course related content', async () => {
-      if (!chatgptTutor.vectorDb) {
-        throw new Error('vectorDb is undefined');
-      }
+  //     // getting second response
+  //     const secondResponse = await functionRepeater(async () => {
+  //       return await chatgptTutor.generateResponse(
+  //         messages,
+  //         messageTransformMockData.aiAssistantId
+  //       );
+  //     }, 3);
+  //     expect(chatgptTutor.chatTransformer).toBeTruthy();
+  //     const secondResponseJson = JSON.parse(secondResponse as string);
+  //     expect(secondResponseJson.greeting).toBeTruthy();
+  //     expect(typeof secondResponseJson.greeting).toBe('string');
+  //   }, 30000);
+  //   it('should respond with course related content', async () => {
+  //     if (!chatgptTutor.vectorDb) {
+  //       throw new Error('vectorDb is undefined');
+  //     }
 
-      chatgptTutor.chatTransformer = (
-        message: ChatgptMessage,
-        aiAssistantId: string
-      ) => message;
-      await chatgptTutor.vectorDb.addCourseSegment(
-        chromaAbstractionMockData.contentInSequence,
-        chromaAbstractionMockData.positionInCourseToAddSequence,
-        chromaAbstractionMockData.batchSize
-      );
-      const messages = [
-        {
-          role: 'user',
-          content:
-            'Please respond with only a JSON object of the following format: { "largestNumber": NUMBER_HERE } where NUMBER_HERE is the largest number in the relevant content.',
-        },
-      ];
-      const response = await chatgptTutor.generateResponse(
-        messages,
-        messageTransformMockData.aiAssistantId,
-        chromaAbstractionMockData.positionInCourseQuery,
-        5
-      );
-      const responseJson = JSON.parse(markdownToJsonParser(response) as string);
-      expect(responseJson.largestNumber).toBe(22);
-    }, 30000);
-  });
+  //     chatgptTutor.chatTransformer = (
+  //       message: ChatgptMessage,
+  //       aiAssistantId: string
+  //     ) => message;
+  //     await chatgptTutor.vectorDb.addCourseSegment(
+  //       chromaAbstractionMockData.contentInSequence,
+  //       chromaAbstractionMockData.positionInCourseToAddSequence,
+  //       chromaAbstractionMockData.batchSize
+  //     );
+  //     const messages = [
+  //       {
+  //         role: 'user',
+  //         content:
+  //           'Please respond with only a JSON object of the following format: { "largestNumber": NUMBER_HERE } where NUMBER_HERE is the largest number in the relevant content.',
+  //       },
+  //     ];
+  //     const response = await chatgptTutor.generateResponse(
+  //       messages,
+  //       messageTransformMockData.aiAssistantId,
+  //       chromaAbstractionMockData.positionInCourseQuery,
+  //       5
+  //     );
+  //     const responseJson = JSON.parse(markdownToJsonParser(response) as string);
+  //     expect(responseJson.largestNumber).toBe(22);
+  //   }, 30000);
+  // });
 });

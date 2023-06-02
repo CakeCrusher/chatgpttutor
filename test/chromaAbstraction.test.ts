@@ -18,13 +18,20 @@ describe('ChromaAbstraction', () => {
     if (!chromaAbstraction.courseCollection) {
       throw new Error('chromaClient not defined');
     }
-    await chromaAbstraction.courseCollection.delete({
-      where: {},
-    });
+  });
+
+  afterEach(async () => {
+    if (!chromaAbstraction.chromaClient) {
+      throw new Error('chromaClient not defined');
+    }
+    if (!chromaAbstraction.courseCollection) {
+      throw new Error('chromaClient not defined');
+    }
+    await chromaAbstraction.chromaClient.deleteCollection({name: chromaAbstraction.courseCollection.name});
   });
 
   describe('initializeChromaAbstraction', () => {
-    it('should create a ChromaClient and courseCollection', () => {
+    test('should create a ChromaClient and courseCollection', () => {
       expect(chromaAbstraction.chromaClient).toBeDefined();
       expect(chromaAbstraction.courseCollection).toBeDefined();
       expect(chromaAbstraction.courseCollection!.name).toBe(
@@ -34,7 +41,7 @@ describe('ChromaAbstraction', () => {
   });
 
   describe('addCourseSegment', () => {
-    it('should upsert items to the courseCollection with proper batching and positionInCourse', async () => {
+    test('should upsert items to the courseCollection with proper batching and positionInCourse', async () => {
       const numberOfUpsertedItems = await chromaAbstraction.addCourseSegment(
         chromaAbstractionMockData.contentInSequence,
         chromaAbstractionMockData.positionInCourseToAddSequence,
@@ -70,7 +77,7 @@ describe('ChromaAbstraction', () => {
   });
 
   describe('queryRelatedCourseMaterial', () => {
-    it('should return the expected related course material documents based on the query and positionInCourse', async () => {
+    test('should return the expected related course material documents based on the query and positionInCourse', async () => {
       await chromaAbstraction.addCourseSegment(
         chromaAbstractionMockData.contentInSequence,
         chromaAbstractionMockData.positionInCourseToAddSequence,
