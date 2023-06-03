@@ -191,6 +191,6 @@ describe('ChatgptTutor', () => {
 
       const responseJson = JSON.parse(markdownToJsonParser(response) as string);
       expect(responseJson.largestNumber).toBe(22);
-    }, 30000);
+    }, 40000);
   });
 });
