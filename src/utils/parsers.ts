@@ -36,10 +36,9 @@ export const markdownToJsonParser = (markdownString: string): string => {
   const splitMarkdownString = markdownString.split('```');
   if (splitMarkdownString.length > 1) {
     // if splitMarkdownString[1] starts with the string "json" delete it
-    if (splitMarkdownString[1].startsWith('json')) {
-      return splitMarkdownString[1].substring(4);
-    }
-    return splitMarkdownString[1];
+    let startWithBrackets =
+      '{' + splitMarkdownString[1].split('{').slice(1).join('{');
+    return startWithBrackets;
   }
   return splitMarkdownString[0];
 };

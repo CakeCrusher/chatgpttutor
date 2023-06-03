@@ -16,14 +16,33 @@ import { functionRepeater } from '../src/utils/misc';
 dotenv.config();
 
 describe('ChatgptTutor', () => {
+  let chatgptTutor: ChatgptTutor;
+  let collectionName: string = 'chatgptTutorTest';
+  const openaiApiKey = process.env.OPENAI_API_KEY as string;
+  const pineconeApiKey = process.env.PINECONE_API_KEY as string;
+
+  beforeEach(async () => {
+    chatgptTutor = new ChatgptTutor();
+
+    await chatgptTutor.initializeChatgptTutor(
+      openaiApiKey,
+      pineconeApiKey,
+      collectionName
+    );
+  });
+  afterEach(async () => {
+    if (!chatgptTutor.vectorDb) {
+      throw new Error('vectorDb is undefined');
+    }
+    if (!chatgptTutor.vectorDb.courseCollection) {
+      throw new Error('courseCollection is undefined');
+    }
+    await chatgptTutor.vectorDb.chromaClient.deleteCollection({
+      name: chatgptTutor.vectorDb.courseCollection.name,
+    });
+  });
   describe('initializeChatgptTutor', () => {
     test('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', async () => {
-      const chatgptTutor = new ChatgptTutor();
-      const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
-
-      await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
-
       expect(chatgptTutor.openaiApiKey).toBe(openaiApiKey);
       expect(chatgptTutor.pineconeApiKey).toBe(pineconeApiKey);
       expect(chatgptTutor.openaiClient).toBeDefined();
@@ -33,9 +52,7 @@ describe('ChatgptTutor', () => {
         throw new Error('vectorDb is undefined');
       }
       expect(chatgptTutor.vectorDb.courseCollection).toBeDefined();
-      expect(chatgptTutor.vectorDb.courseCollection.name).toBe(
-        'course-collection'
-      );
+      expect(chatgptTutor.vectorDb.courseCollection.name).toBe(collectionName);
     });
 
     test('should create a valid OpenAIApi client with the provided API key', () => {
@@ -52,21 +69,13 @@ describe('ChatgptTutor', () => {
       expect(chatgptTutor.openaiClient.configuration.apiKey).toBe(openaiApiKey);
     });
   });
-  describe('generateMessageTransformer', () => {
-    let chatgptTutor: ChatgptTutor;
-    beforeEach(async () => {
-      chatgptTutor = new ChatgptTutor();
-      const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
-    });
+  describe('generateMessageTransformer', () => {
     test('should generate a valid message transformer function', async () => {
       const stringifiedGeneratedFunctionObject =
         await chatgptTutor.generateMessageTransformer(
           messageTransformMockData.baseMessages
         );
-
       expect(stringifiedGeneratedFunctionObject).toBeTruthy();
 
       const generatedTransformerFunction:
@@ -91,22 +100,6 @@ describe('ChatgptTutor', () => {
   });
 
   describe('generateResponse', () => {
-    let chatgptTutor: ChatgptTutor;
-
-    beforeEach(async () => {
-      chatgptTutor = new ChatgptTutor();
-      const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
-
-      await chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
-      if (!chatgptTutor.vectorDb) {
-        throw new Error('vectorDb is undefined');
-      }
-      await chatgptTutor.vectorDb.courseCollection.delete({
-        where: {},
-      });
-    });
-
     test('should generate a response from a pre-generated chatTransformer', async () => {
       chatgptTutor.chatTransformer = generatedMessageTransformerParser(
         messageTransformMockData.generatedTransformerString
@@ -164,6 +157,9 @@ describe('ChatgptTutor', () => {
       expect(secondResponseJson.greeting).toBeTruthy();
       expect(typeof secondResponseJson.greeting).toBe('string');
     }, 30000);
+  });
+
+  describe('queryRelatedCourseMaterial', () => {
     test('should respond with course related content', async () => {
       if (!chatgptTutor.vectorDb) {
         throw new Error('vectorDb is undefined');
@@ -189,8 +185,10 @@ describe('ChatgptTutor', () => {
         messages,
         messageTransformMockData.aiAssistantId,
         chromaAbstractionMockData.positionInCourseQuery,
-        5
+        5,
+        0
       );
+
       const responseJson = JSON.parse(markdownToJsonParser(response) as string);
       expect(responseJson.largestNumber).toBe(22);
     }, 30000);

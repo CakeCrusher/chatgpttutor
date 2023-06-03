@@ -50,7 +50,7 @@ describe('OpenaiAbstraction', () => {
       expect(responseJson.greeting).toBeTruthy();
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
-    }, 15000);
+    }, 30000);
   });
 
   describe('chatgptErrorResolver', () => {
@@ -69,6 +69,6 @@ describe('OpenaiAbstraction', () => {
       expect(responseJson.greeting).toBeTruthy();
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
-    }, 15000);
+    }, 30000);
   });
 });

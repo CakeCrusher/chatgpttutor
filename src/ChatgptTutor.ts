@@ -26,18 +26,19 @@ export class ChatgptTutor extends OpenaiAbstraction {
     this.initializeOpenaiAbstraction(openaiApiKey);
     this.pineconeApiKey = pineconeApiKey;
     const chromaAbstraction = new ChromaAbstraction();
+    this.vectorDb = chromaAbstraction;
     await chromaAbstraction.initializeChromaAbstraction(
       openaiApiKey,
       collectionName
     );
-    this.vectorDb = chromaAbstraction;
   }
 
   async generateResponse(
     messages: any[],
     aiAssistantId: string,
     positionInCourse: number[] | null = null,
-    amountOfCourseContext: number | null = null
+    amountOfCourseContext: number | null = null,
+    temperature: number = 1
   ): Promise<string> {
     if (!this.chatTransformer) {
       const messageTransformerObj = await this.generateMessageTransformer(
@@ -52,7 +53,6 @@ export class ChatgptTutor extends OpenaiAbstraction {
       (message: any) =>
         this.chatTransformer?.(message, aiAssistantId) as ChatgptMessage
     );
-
     // if positionInCourse is not null then edit the last message in transformedMessages to have the positionInCourse
     if (this.vectorDb && positionInCourse && amountOfCourseContext) {
       // get relevant course material from vectorDb
@@ -74,7 +74,9 @@ export class ChatgptTutor extends OpenaiAbstraction {
     const completion = await this.openaiClient.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: transformedMessages,
+      temperature,
     });
+
     return completion.data.choices[0]?.message?.content;
   }
 
@@ -85,7 +87,7 @@ export class ChatgptTutor extends OpenaiAbstraction {
     );
 
     // first attempt at generating message transformer
-    let generatedString = await this.basicChatgptRequest(prompt);
+    let generatedString = await this.basicChatgptRequest(prompt, 0);
     if (!generatedString) {
       throw new Error('Failed to generate message parser');
     }

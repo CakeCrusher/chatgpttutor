@@ -18,7 +18,10 @@ export class OpenaiAbstraction {
     this.openaiClient = new OpenAIApi(configuration);
   }
 
-  async basicChatgptRequest(prompt: string): Promise<string | undefined> {
+  async basicChatgptRequest(
+    prompt: string,
+    temperature: number = 1
+  ): Promise<string | undefined> {
     const messages = [
       {
         role: 'user',
@@ -28,6 +31,7 @@ export class OpenaiAbstraction {
     const completion = await this.openaiClient.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages,
+      temperature,
     });
     return completion.data.choices[0]?.message?.content || undefined;
   }
