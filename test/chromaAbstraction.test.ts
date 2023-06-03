@@ -7,6 +7,7 @@ dotenv.config();
 
 describe('ChromaAbstraction', () => {
   let chromaAbstraction: ChromaAbstraction;
+  const collectionName = 'chromaCollection';
 
   beforeEach(async () => {
     chromaAbstraction = new ChromaAbstraction();
@@ -14,7 +15,10 @@ describe('ChromaAbstraction', () => {
     if (!openaiApiKey) {
       throw new Error('OPENAI_API_KEY not defined in .env');
     }
-    await chromaAbstraction.initializeChromaAbstraction(openaiApiKey);
+    await chromaAbstraction.initializeChromaAbstraction(
+      openaiApiKey,
+      collectionName
+    );
     if (!chromaAbstraction.courseCollection) {
       throw new Error('chromaClient not defined');
     }
@@ -36,9 +40,7 @@ describe('ChromaAbstraction', () => {
     test('should create a ChromaClient and courseCollection', () => {
       expect(chromaAbstraction.chromaClient).toBeDefined();
       expect(chromaAbstraction.courseCollection).toBeDefined();
-      expect(chromaAbstraction.courseCollection!.name).toBe(
-        'course-collection'
-      );
+      expect(chromaAbstraction.courseCollection!.name).toBe(collectionName);
     });
   });
 
