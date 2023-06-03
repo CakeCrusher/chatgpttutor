@@ -5,6 +5,7 @@ import { batchString } from './utils/misc';
 export class ChromaAbstraction {
   chromaClient: ChromaClient | undefined;
   courseCollection: Collection | undefined;
+  collectionName: string | undefined;
 
   constructor() {
     this.chromaClient = undefined;

@@ -4,11 +4,13 @@ import { Configuration, OpenAIApi } from 'openai';
 import { OpenaiAbstraction } from '../src/OpenaiAbstraction';
 import { testPrompt } from '../src/utils/prompts';
 
+import { openaiAbstractionMockData } from '../src/utils/mockData';
+
 dotenv.config();
 
 describe('OpenaiAbstraction', () => {
   describe('initializeOpenaiAbstraction', () => {
-    it('should initialize OpenAI client with the provided API key', () => {
+    test('should initialize OpenAI client with the provided API key', () => {
       const openaiAbstraction = new OpenaiAbstraction();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
 
@@ -18,7 +20,7 @@ describe('OpenaiAbstraction', () => {
       expect(openaiAbstraction.openaiClient).toBeDefined();
       expect(openaiAbstraction.openaiClient).toBeInstanceOf(OpenAIApi);
     });
-    it('should create a valid OpenAiApi client with the provided API key', () => {
+    test('should create a valid OpenAiApi client with the provided API key', () => {
       const openaiAbstraction = new OpenaiAbstraction();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
 
@@ -35,7 +37,7 @@ describe('OpenaiAbstraction', () => {
   });
 
   describe('basicChatgptRequest', () => {
-    it('should make a basic chat GPT-3.5-turbo request and return the response', async () => {
+    test('should make a basic chat GPT-3.5-turbo request and return the response', async () => {
       const openaiAbstraction = new OpenaiAbstraction();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       openaiAbstraction.initializeOpenaiAbstraction(openaiApiKey);
@@ -48,31 +50,25 @@ describe('OpenaiAbstraction', () => {
       expect(responseJson.greeting).toBeTruthy();
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
-    }, 15000);
+    }, 30000);
   });
 
   describe('chatgptErrorResolver', () => {
-    it('should make a chat GPT-3.5-turbo request to resolve an error and return the response', async () => {
+    test('should make a chat GPT-3.5-turbo request to resolve an error and return the response', async () => {
       const openaiAbstraction = new OpenaiAbstraction();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
       openaiAbstraction.initializeOpenaiAbstraction(openaiApiKey);
 
-      const result = `{
-        "greeting"= "Hello, and welcome!"
-      }`;
-      const error =
-        'Uncaught SyntaxError: Unexpected token = in JSON at position 11';
-
       const correctedResponse = await openaiAbstraction.chatgptErrorResolver(
         testPrompt,
-        result,
-        error
+        openaiAbstractionMockData.errorResolverResult,
+        openaiAbstractionMockData.errorResolverError
       );
       expect(correctedResponse).toBeTruthy();
       const responseJson = JSON.parse(correctedResponse as string);
       expect(responseJson.greeting).toBeTruthy();
       // expect responseJson.greeting to be a string
       expect(typeof responseJson.greeting).toBe('string');
-    }, 15000);
+    }, 30000);
   });
 });
