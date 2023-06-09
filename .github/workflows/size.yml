@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
       - name: Start ChromaDB
-        uses: CakeCrusher/ChromaDB@v1.0.0
+        uses: CakeCrusher/chroma@v1.0.0
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
