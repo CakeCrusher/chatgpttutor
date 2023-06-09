@@ -9,13 +9,15 @@ jobs:
     strategy:
       matrix:
         node: ['16.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest]  # remove windows-latest, macOS-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
       - name: Start ChromaDB
+        if: matrix.os == 'ubuntu-latest'  # only run this step on ubuntu
         uses: CakeCrusher/chroma@v1.0.0
 
       - name: Use Node ${{ matrix.node }}
