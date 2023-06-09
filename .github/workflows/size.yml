@@ -18,7 +18,7 @@ jobs:
 
       - name: Start ChromaDB
         if: matrix.os == 'ubuntu-latest'  # only run this step on ubuntu
-        uses: CakeCrusher/chroma@v1.0.0
+        uses: CakeCrusher/chroma@v1.0.1
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
