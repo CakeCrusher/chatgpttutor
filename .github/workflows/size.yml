@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        node: ['16.x']
+        node: ['18.x']
         os: [ubuntu-latest]  # remove windows-latest, macOS-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -18,6 +18,14 @@ jobs:
 
       - name: Start ChromaDB
         uses: CakeCrusher/chroma@v1.0.2
+
+      - name: Wait for server to be ready
+        run: |
+          while ! curl -s http://localhost:8000 > /dev/null; do
+            echo "Waiting for server..."
+            sleep 5
+          done
+        shell: bash
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
