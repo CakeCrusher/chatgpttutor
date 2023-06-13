@@ -7,24 +7,20 @@ import { OpenaiAbstraction } from './OpenaiAbstraction';
 import { ChromaAbstraction } from './ChromaAbstraction';
 
 export class ChatgptTutor extends OpenaiAbstraction {
-  pineconeApiKey: string | undefined;
   chatTransformer: GeneratedTransformerFunction | undefined;
   vectorDb: VectorDb | undefined;
 
   constructor() {
     super();
-    this.pineconeApiKey = undefined;
     this.chatTransformer = undefined;
     this.vectorDb = undefined;
   }
 
   async initializeChatgptTutor(
     openaiApiKey: string,
-    pineconeApiKey: string,
     collectionName: string = 'course-collection'
   ): Promise<void> {
     this.initializeOpenaiAbstraction(openaiApiKey);
-    this.pineconeApiKey = pineconeApiKey;
     const chromaAbstraction = new ChromaAbstraction();
     this.vectorDb = chromaAbstraction;
     await chromaAbstraction.initializeChromaAbstraction(

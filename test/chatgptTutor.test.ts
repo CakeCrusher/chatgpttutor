@@ -20,16 +20,11 @@ describe('ChatgptTutor', () => {
   let chatgptTutor: ChatgptTutor;
   let collectionName: string = 'chatgptTutorTest';
   const openaiApiKey = process.env.OPENAI_API_KEY as string;
-  const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
   beforeEach(async () => {
     chatgptTutor = new ChatgptTutor();
 
-    await chatgptTutor.initializeChatgptTutor(
-      openaiApiKey,
-      pineconeApiKey,
-      collectionName
-    );
+    await chatgptTutor.initializeChatgptTutor(openaiApiKey, collectionName);
   });
   afterEach(async () => {
     if (!chatgptTutor.vectorDb) {
@@ -42,10 +37,10 @@ describe('ChatgptTutor', () => {
       name: chatgptTutor.vectorDb.courseCollection.name,
     });
   });
+
   describe('initializeChatgptTutor', () => {
-    test('should set the openaiApiKey, pineconeApiKey, and openaiClient properties', async () => {
+    test('should set the openaiApiKey, and openaiClient properties', async () => {
       expect(chatgptTutor.openaiApiKey).toBe(openaiApiKey);
-      expect(chatgptTutor.pineconeApiKey).toBe(pineconeApiKey);
       expect(chatgptTutor.openaiClient).toBeDefined();
       expect(chatgptTutor.vectorDb).toBeDefined();
       expect(chatgptTutor.vectorDb).toBeInstanceOf(ChromaAbstraction);
@@ -59,9 +54,8 @@ describe('ChatgptTutor', () => {
     test('should create a valid OpenAIApi client with the provided API key', () => {
       const chatgptTutor = new ChatgptTutor();
       const openaiApiKey = process.env.OPENAI_API_KEY as string;
-      const pineconeApiKey = process.env.PINECONE_API_KEY as string;
 
-      chatgptTutor.initializeChatgptTutor(openaiApiKey, pineconeApiKey);
+      chatgptTutor.initializeChatgptTutor(openaiApiKey);
 
       expect(chatgptTutor.openaiClient).toBeInstanceOf(OpenAIApi);
       expect(chatgptTutor.openaiClient.configuration).toBeInstanceOf(
