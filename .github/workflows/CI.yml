@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Start ChromaDB
-        uses: CakeCrusher/chroma@v1.0.2
+        uses: CakeCrusher/chroma@v1.0.3
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
