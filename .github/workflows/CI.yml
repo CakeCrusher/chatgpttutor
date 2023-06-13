@@ -1,23 +1,23 @@
 name: CI
-on:
-  push:
-    branches:
-      - main
+on: [push, pull_request]
 jobs:
-  build:
+  ci:
     name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
 
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        node: ['16.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        node: ['18.x']
+        os: [ubuntu-latest]
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Start ChromaDB
+        uses: CakeCrusher/chroma@v1.0.3
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
@@ -31,19 +31,4 @@ jobs:
         run: yarn lint
 
       - name: Test
-        run: yarn test:else --ci --coverage --maxWorkers=2
-
-      - name: Build
-        run: yarn build
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: yarn install
-      - uses: JS-DevTools/npm-publish@v2
-        with:
-          token: ${{ secrets.NPM_AUTH_TOKEN }}
+        run: yarn test --ci --coverage --maxWorkers=1
