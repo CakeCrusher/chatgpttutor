@@ -1,6 +1,6 @@
-name: CI
+name: publish
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
@@ -11,8 +11,8 @@ jobs:
 
     strategy:
       matrix:
-        node: ['16.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        node: ['18.x']
+        os: [ubuntu-latest]
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
@@ -27,23 +27,6 @@ jobs:
       - name: Install deps and build (with cache)
         uses: bahmutov/npm-install@v1
 
-      - name: Lint
-        run: yarn lint
-
-      - name: Test
-        run: yarn test --ci --coverage --maxWorkers=2
-
-      - name: Build
-        run: yarn build
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: yarn install
       - uses: JS-DevTools/npm-publish@v2
         with:
           token: ${{ secrets.NPM_AUTH_TOKEN }}
