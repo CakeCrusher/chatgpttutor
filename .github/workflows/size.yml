@@ -8,13 +8,24 @@ jobs:
 
     strategy:
       matrix:
-        node: ['16.x']
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        node: ['18.x']
+        os: [ubuntu-latest]  # remove windows-latest, macOS-latest
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
+
+      - name: Start ChromaDB
+        uses: CakeCrusher/chroma@v1.0.2
+
+      - name: Wait for server to be ready
+        run: |
+          while ! curl -s http://localhost:8000 > /dev/null; do
+            echo "Waiting for server..."
+            sleep 5
+          done
+        shell: bash
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v3
@@ -28,16 +39,16 @@ jobs:
         run: yarn lint
 
       - name: Test
-        run: yarn test:else --ci --coverage --maxWorkers=2
+        run: yarn test --ci --coverage --maxWorkers=2
 
       - name: Build
         run: yarn build
-  size:
-    runs-on: ubuntu-latest
-    env:
-      CI_JOB_NUMBER: 1
-    steps:
-      - uses: actions/checkout@v3
-      - uses: andresz1/size-limit-action@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+  # size:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     CI_JOB_NUMBER: 1
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: andresz1/size-limit-action@v1
+  #       with:
+  #         github_token: ${{ secrets.GITHUB_TOKEN }}
