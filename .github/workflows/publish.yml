@@ -4,8 +4,8 @@ on:
     branches:
       - main
 jobs:
-  build:
-    name: Build, lint, and test on Node ${{ matrix.node }} and ${{ matrix.os }}
+  publish:
+    name: Publish to npm
 
     runs-on: ${{ matrix.os }}
 
