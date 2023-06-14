@@ -1,32 +1,47 @@
-import { generateMessageTransformerPrompt } from './utils/prompts';
+import {
+  generateMessageTransformerPrompt,
+  messageWithContent,
+} from './utils/prompts';
 import { generatedMessageTransformerParser } from './utils/parsers';
 import { OpenaiAbstraction } from './OpenaiAbstraction';
+import { ChromaAbstraction } from './ChromaAbstraction';
 
 export class ChatgptTutor extends OpenaiAbstraction {
-  pineconeApiKey: string | undefined;
   chatTransformer: GeneratedTransformerFunction | undefined;
+  vectorDb: VectorDb | undefined;
 
   constructor() {
     super();
-    this.pineconeApiKey = undefined;
     this.chatTransformer = undefined;
+    this.vectorDb = undefined;
   }
 
-  initializeChatgptTutor(openaiApiKey: string, pineconeApiKey: string): void {
+  async initializeChatgptTutor(
+    openaiApiKey: string,
+    collectionName: string = 'course-collection'
+  ): Promise<void> {
     this.initializeOpenaiAbstraction(openaiApiKey);
-    this.pineconeApiKey = pineconeApiKey;
+    const chromaAbstraction = new ChromaAbstraction();
+    this.vectorDb = chromaAbstraction;
+    await chromaAbstraction.initializeChromaAbstraction(
+      openaiApiKey,
+      collectionName
+    );
   }
 
   async generateResponse(
     messages: any[],
-    aiAssistantId: string
+    aiAssistantId: string,
+    positionInCourse: number[] | null = null,
+    amountOfCourseContext: number | null = null,
+    temperature: number = 1
   ): Promise<string> {
     if (!this.chatTransformer) {
       const messageTransformerObj = await this.generateMessageTransformer(
         messages
       );
       console.log(
-        'This is you generated message transformer object:\n',
+        'This is your generated message transformer object:\n',
         messageTransformerObj
       );
     }
@@ -34,11 +49,30 @@ export class ChatgptTutor extends OpenaiAbstraction {
       (message: any) =>
         this.chatTransformer?.(message, aiAssistantId) as ChatgptMessage
     );
+    // if positionInCourse is not null then edit the last message in transformedMessages to have the positionInCourse
+    if (this.vectorDb && positionInCourse && amountOfCourseContext) {
+      // get relevant course material from vectorDb
+      const courseMaterial = await this.vectorDb.queryRelatedCourseMaterial(
+        transformedMessages[transformedMessages.length - 1].content,
+        amountOfCourseContext,
+        positionInCourse
+      );
+      if (courseMaterial) {
+        const newFinalMessageContent = messageWithContent(
+          transformedMessages[transformedMessages.length - 1].content,
+          courseMaterial
+        );
+        transformedMessages[transformedMessages.length - 1].content =
+          newFinalMessageContent;
+      }
+    }
 
     const completion = await this.openaiClient.createChatCompletion({
       model: 'gpt-3.5-turbo',
       messages: transformedMessages,
+      temperature,
     });
+
     return completion.data.choices[0]?.message?.content;
   }
 
@@ -49,7 +83,7 @@ export class ChatgptTutor extends OpenaiAbstraction {
     );
 
     // first attempt at generating message transformer
-    let generatedString = await this.basicChatgptRequest(prompt);
+    let generatedString = await this.basicChatgptRequest(prompt, 0);
     if (!generatedString) {
       throw new Error('Failed to generate message parser');
     }
@@ -62,15 +96,18 @@ export class ChatgptTutor extends OpenaiAbstraction {
     } catch (error: any) {
       // second attempt to generate message transformer with chatgptErrorResolver
       console.warn(
-        'Failed to generate first transformer function with error:',
+        'Failed to generate first transformer function with generatedString:',
+        generatedString,
+        'and error:',
         error
       );
+      let fixedGeneratedString;
       try {
         let truncatedError = error.toString().substring(0, 200);
         if (error.message) {
           truncatedError = error.message.substring(0, 200);
         }
-        const fixedGeneratedString = await this.chatgptErrorResolver(
+        fixedGeneratedString = await this.chatgptErrorResolver(
           prompt,
           generatedString,
           truncatedError
@@ -84,7 +121,12 @@ export class ChatgptTutor extends OpenaiAbstraction {
         this.chatTransformer = generatedTransformerFunction;
         generatedString = fixedGeneratedString;
       } catch (error: any) {
-        console.error(error);
+        console.error(
+          'Failed to generate message transformer function with fixedGeneratedString:',
+          fixedGeneratedString,
+          'and error:',
+          error
+        );
         throw new Error(
           'Failed to generate message transformer function. Please create your own function that transforms a single message to be of type `ChatgptMessage`, then assign it to the property `chatTransformer`.'
         );

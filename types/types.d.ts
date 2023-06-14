@@ -19,3 +19,29 @@ declare module 'openai' {
   const Configuration: any;
   export { OpenAIApi, Configuration };
 }
+
+type CourseSegment = {
+  content: string;
+  positionInCourse: number;
+};
+
+type UpsertInfo = {
+  ids: string[];
+  metadatas: any[];
+  documents: string[];
+};
+
+type VectorDb = {
+  addCourseSegment: (
+    contentInSequence: string[],
+    positionInCourse: number[],
+    batchSize: number = 60
+  ) => Promise<number>;
+  queryRelatedCourseMaterial: (
+    query: string,
+    amount: number = 3,
+    positionInCourse: number[] | null = null
+  ) => Promise<string[] | null>;
+  chromaClient: ChromaClient;
+  courseCollection: Collection;
+};
