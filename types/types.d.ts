@@ -50,4 +50,5 @@ type ChatgptFunctionSignature = {
   name: string;
   description: string;
   parameters: any;
+  function_call?: any;
 }

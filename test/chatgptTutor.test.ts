@@ -12,7 +12,6 @@ import {
   markdownToJsonParser,
 } from '../src/utils/parsers';
 import { testPrompt } from '../src/utils/prompts';
-import { functionRepeater } from '../src/utils/misc';
 
 dotenv.config();
 
@@ -66,7 +65,7 @@ describe('ChatgptTutor', () => {
   });
 
   describe('generateMessageTransformer', () => {
-    test.only('should generate a valid message transformer function', async () => {
+    test('should generate a valid message transformer function', async () => {
       const stringifiedGeneratedFunctionObject =
         await chatgptTutor.generateMessageTransformer(
           messageTransformMockData.baseMessages
@@ -96,9 +95,11 @@ describe('ChatgptTutor', () => {
 
   describe('generateResponse', () => {
     test('should generate a response from a pre-generated chatTransformer', async () => {
-      chatgptTutor.chatTransformer = generatedMessageTransformerParser(
+      const parsedMessageTransformer = generatedMessageTransformerParser(
         messageTransformMockData.generatedTransformerString
       );
+      chatgptTutor.chatTransformer = parsedMessageTransformer.parsedFunction;
+
       const messages = [
         {
           id: 'SuperGuy678',
@@ -129,24 +130,20 @@ describe('ChatgptTutor', () => {
       ];
       expect(chatgptTutor.chatTransformer).toBeUndefined();
       // getting first response and generating messateTransformer
-      const firstResponse = await functionRepeater(async () => {
-        return await chatgptTutor.generateResponse(
-          messages,
-          messageTransformMockData.aiAssistantId
-        );
-      }, 3);
+      const firstResponse = await chatgptTutor.generateResponse(
+        messages,
+        messageTransformMockData.aiAssistantId
+      );
       expect(chatgptTutor.chatTransformer).toBeTruthy();
       const firstResponseJson = JSON.parse(firstResponse as string);
       expect(firstResponseJson.greeting).toBeTruthy();
       expect(typeof firstResponseJson.greeting).toBe('string');
 
       // getting second response
-      const secondResponse = await functionRepeater(async () => {
-        return await chatgptTutor.generateResponse(
-          messages,
-          messageTransformMockData.aiAssistantId
-        );
-      }, 3);
+      const secondResponse = await chatgptTutor.generateResponse(
+        messages,
+        messageTransformMockData.aiAssistantId
+      );
       expect(chatgptTutor.chatTransformer).toBeTruthy();
       const secondResponseJson = JSON.parse(secondResponse as string);
       expect(secondResponseJson.greeting).toBeTruthy();

@@ -1,11 +1,11 @@
 import {
-  generateMessageTransformerPrompt,
   messageWithContent,
+  requestForMessageTransformer,
 } from './utils/prompts';
 import { generatedMessageTransformerParser } from './utils/parsers';
 import { OpenaiAbstraction } from './OpenaiAbstraction';
 import { ChromaAbstraction } from './ChromaAbstraction';
-import { messageTransformer } from './utils/chatgptFunctionsSignature';
+import { messageTransformerSignature } from './utils/chatgptFunctionsSignatures';
 
 export class ChatgptTutor extends OpenaiAbstraction {
   chatTransformer: GeneratedTransformerFunction | undefined;
@@ -78,55 +78,33 @@ export class ChatgptTutor extends OpenaiAbstraction {
   }
 
   async generateMessageTransformer(messages: any[]): Promise<string> {
-    const stringifiedMessageInputInstance = JSON.stringify(messages[0]);
-    const functionSignature =     {
-      "name": "message_transformer",
-      "description": `Parses a stringified javascript function to transform a message of unknown schema into an object of type ChatgptMessage delimited by triple backticks.
-      \`\`\`
-      type ChatgptRole = 'user' | 'assistant' | 'system';
-      type ChatgptMessage = {
-        role: ChatgptRole;
-        content: string;
-      };
-      \`\`\``,
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "transformer_function": {
-            "type": "string",
-            "description": `The stringified javascript single line arrow function that is passed two inputs: 'message' (object representing a message instance of an unknown schema) and 'aiAssistantId' (string representing the id that will determine if the role of the user who wrote the message is "assistant" or "user").
-            The function will return an object of type ChatgptMessage delimited by triple backticks.
-            \`\`\`
-            type ChatgptRole = 'user' | 'assistant' | 'system';
-            type ChatgptMessage = {
-              role: ChatgptRole;
-              content: string;
-            };
-            \`\`\``,
-          },
+    try {
+      const stringifiedMessageInputInstance = JSON.stringify(messages[0]);
+      const chatgptMessages = [
+        {
+          role: 'user',
+          content: requestForMessageTransformer(
+            stringifiedMessageInputInstance
+          ),
         },
-        "required": ["transformer_function"]
-      },
-      function_call: {"name": "message_transformer"},
+      ];
+
+      const completion = await this.openaiClient.createChatCompletion({
+        model: 'gpt-3.5-turbo-0613',
+        messages: chatgptMessages,
+        functions: [messageTransformerSignature],
+        temperature: 0,
+      });
+
+      const parsedMessageTransformer = generatedMessageTransformerParser(
+        completion.data.choices[0].message.function_call.arguments
+      );
+
+      this.chatTransformer = parsedMessageTransformer.parsedFunction;
+
+      return parsedMessageTransformer.parsedString;
+    } catch (error) {
+      return `Failed to generate message transformer with error:\n${error}`;
     }
-    const chatgptMessages = [
-      {"role": "user", "content": `Please create a function to transform the message example delimited by triple backticks into a message of ChatgptMessage schema.
-      \`\`\`
-      ${stringifiedMessageInputInstance}
-      \`\`\``},
-    ]
-
-    const completion = await this.openaiClient.createChatCompletion({
-      model: 'gpt-3.5-turbo-0613',
-      messages: chatgptMessages,
-      functions: [functionSignature],
-      temperature: 0,
-    });
-    
-    const jsonResponse = JSON.parse(completion.data.choices[0].message.function_call.arguments);
-    
-    this.chatTransformer = eval(jsonResponse.transformer_function);
-
-    return jsonResponse.transformer_function
   }
 }
