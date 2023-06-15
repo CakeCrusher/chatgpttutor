@@ -1,14 +1,20 @@
 export const generatedMessageTransformerParser = (
   generatedString: string
-): GeneratedTransformerFunction => {
-  generatedString = markdownToJsonParser(generatedString);
-  const generatedObj: { javascriptFunction: string } =
-    JSON.parse(generatedString);
-
+): {
+  parsedFunction: GeneratedTransformerFunction;
+  parsedString: string;
+} => {
+  const markdownParsed = markdownToJsonParser(generatedString);
+  const generatedObj: { transformer_function: string } =
+    JSON.parse(markdownParsed);
+  // eslint-disable-next-line no-eval
   const generatedTransformerFunction: GeneratedTransformerFunction = eval(
-    generatedObj.javascriptFunction
+    markdownToJsonParser(generatedObj.transformer_function)
   );
-  return generatedTransformerFunction;
+  return {
+    parsedFunction: generatedTransformerFunction,
+    parsedString: generatedObj.transformer_function,
+  };
 };
 
 export const positionInCourseParser = (positionInCourse: number[]): number => {
@@ -34,11 +40,18 @@ export const positionInCourseParser = (positionInCourse: number[]): number => {
 
 export const markdownToJsonParser = (markdownString: string): string => {
   const splitMarkdownString = markdownString.split('```');
-  if (splitMarkdownString.length > 1) {
-    // if splitMarkdownString[1] starts with the string "json" delete it
-    let startWithBrackets =
-      '{' + splitMarkdownString[1].split('{').slice(1).join('{');
-    return startWithBrackets;
+  if (splitMarkdownString.length > 2) {
+    // checking if there's a closing fence too
+    let codeBlock = splitMarkdownString[1];
+    let indexOfFirstNewLine = codeBlock.indexOf('\n');
+    if (indexOfFirstNewLine !== -1) {
+      // Strip off the language tag that precedes the actual code
+      codeBlock = codeBlock.substring(indexOfFirstNewLine + 1);
+    }
+    // Remove everything after the ending '```'
+    codeBlock = codeBlock.split('```')[0];
+    return codeBlock;
   }
-  return splitMarkdownString[0];
+  // If there is no code block, return the original string
+  return markdownString;
 };

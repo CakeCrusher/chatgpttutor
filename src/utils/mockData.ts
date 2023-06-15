@@ -31,7 +31,7 @@ const baseMessages: any = [
   },
 ];
 const generatedTransformerString: string =
-  '{\n  "javascriptFunction": "(message, aiAssistantId) => ({role: message.sender_id === aiAssistantId ? \'assistant\' : \'user\', content: message.text})"\n}';
+  '{\n  "transformer_function": "(message, aiAssistantId) => ({role: message.sender_id === aiAssistantId ? \'assistant\' : \'user\', content: message.text})"\n}';
 const transformedMessages: ChatgptMessage[] = [
   {
     role: 'user',

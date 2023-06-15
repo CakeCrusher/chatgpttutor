@@ -1,24 +1,9 @@
-/* eslint-disable prettier/prettier */
-export const generateMessageTransformerPrompt = (strigifiedMessageInputInstance: string) => {
-  return `
-  Your task is to create a javascript single line arrow function as a string that is passed two inputs: 'message' (object representing a message instance) and 'aiAssistantId' (string representing the id that will determine if the role of the user who wrote the message should be is "assistant" or "user").
-  The javascript function will transform the message into an object of type ChatgptMessage.
-  Your response will be in JSON format containing a single key-value pair of the 'javascriptFunction' to the javascript function that you create.
-  Both the input example and the ChatgptTutor typing are delimited by triple backticks.
-  Input example:
-  \`\`\`
-  ${strigifiedMessageInputInstance}
-  \`\`\`
-  ChatgptTutor typing:
-  \`\`\`
-  type ChatgptRole = 'user' | 'assistant' | 'system';
-  type ChatgptMessage = {
-    role: ChatgptRole;
-    content: string;
-  };
-  \`\`\`
-  `
-}
+export const requestForMessageTransformer = (
+  stringifiedMessageInputInstance: string
+) => `Please create a function to transform the message example delimited by triple backticks into a message of ChatgptMessage schema.
+\`\`\`
+${stringifiedMessageInputInstance}
+\`\`\``;
 
 export const errorResolutionPrompt = (error: string) => {
   return `
@@ -28,8 +13,8 @@ export const errorResolutionPrompt = (error: string) => {
   \`\`\`
   ${error}
   \`\`\`
-  `
-}
+  `;
+};
 
 export const testPrompt = `
 Your task is to produce a greeting in the following JSON format:
@@ -38,13 +23,18 @@ Your task is to produce a greeting in the following JSON format:
   "greeting": GREETING_STRING_HERE
 }
 \`\`\`
-`
+`;
 
-export const messageWithContent = (message: string, contents: string[]): string => {
+export const messageWithContent = (
+  message: string,
+  contents: string[]
+): string => {
   // transform list of contents into an enumerated list string
-  const enumeratedContents = contents.map((content, index) => {
-    return `${index + 1}. ${content}`;
-  }).join('\n');
+  const enumeratedContents = contents
+    .map((content, index) => {
+      return `${index + 1}. ${content}`;
+    })
+    .join('\n');
 
   return `
   Your task is to generate a response to the message delimited by triple backticks using the related content also delimited with triple backticks.
@@ -57,5 +47,5 @@ export const messageWithContent = (message: string, contents: string[]): string 
   \`\`\`
   ${message}
   \`\`\`
-  `
-}
+  `;
+};
