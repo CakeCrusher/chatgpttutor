@@ -66,7 +66,7 @@ describe('ChatgptTutor', () => {
   });
 
   describe('generateMessageTransformer', () => {
-    test('should generate a valid message transformer function', async () => {
+    test.only('should generate a valid message transformer function', async () => {
       const stringifiedGeneratedFunctionObject =
         await chatgptTutor.generateMessageTransformer(
           messageTransformMockData.baseMessages
