@@ -2469,10 +2469,10 @@ chokidar@^3.5.3:
   optionalDependencies:
     fsevents "~2.3.2"
 
-chromadb@^1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/chromadb/-/chromadb-1.5.0.tgz#80d97d9db08fca07a8b2554f1327429de19ed8b9"
-  integrity sha512-uBHbgykL5lYuXXaTst3H9P/539pC8vJNe7pzkyl8oGVWgJJjrgA8XGyFstTjG8EjjxxUpTUh8GcU4LmfgOu9dg==
+chromadb@^1.5.2:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/chromadb/-/chromadb-1.5.2.tgz#ecab11092155997771ded62a82f1c40ca578536a"
+  integrity sha512-x/rOD7Oo1RiYA+vPK+Ma7CliCHlx26OjUt5J7Z9HZ5Ud1qDrPlvctBycK9Il3zqza96yeUoPQ7gCXHVKNoyvRQ==
 
 ci-info@^3.2.0:
   version "3.8.0"

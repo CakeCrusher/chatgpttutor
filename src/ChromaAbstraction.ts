@@ -84,8 +84,8 @@ export class ChromaAbstraction {
       };
     }
     const results = await this.courseCollection.query({
-      n_results: amount,
-      query_text: [query],
+      nResults: amount,
+      queryTexts: [query],
       where: whereCondition,
     });
 
