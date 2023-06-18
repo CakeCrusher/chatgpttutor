@@ -1,6 +1,7 @@
 # chatgpttutor (aka chatipiti tutor)
 
-https://github.com/CakeCrusher/chatgpttutor/assets/37946988/8a800a40-19e5-4c43-b8f6-df2b7b9421a3
+https://github.com/CakeCrusher/chatgpttutor/assets/37946988/19c08777-e321-4ad4-8ab4-3c47acc3ed0c
+
 
 ## Quickstart
 0. Make sure to have chroma server running on port 8000 (default port). See [chroma](https://github.com/chroma-core/chroma)
