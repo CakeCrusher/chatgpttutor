@@ -79,6 +79,19 @@ describe('ChatgptTutor', () => {
 
       expect(generatedTransformerFunction).toBeInstanceOf(Function);
 
+      const metadataTransformerObjectString: string =
+        chatgptTutor.vectorDb?.courseCollection.metadata
+          .generatedTransformerObjectString;
+      const parsedMessageTransformer = generatedMessageTransformerParser(
+        metadataTransformerObjectString
+      );
+      expect(parsedMessageTransformer.parsedFunction).toBeInstanceOf(Function);
+
+      // when client is reinitialized, the chatTransformer should be set to the parsedFunction
+      const chatgptTutor2 = new ChatgptTutor();
+      await chatgptTutor2.initializeChatgptTutor(openaiApiKey, collectionName);
+      expect(chatgptTutor2.chatTransformer).toBeInstanceOf(Function);
+
       const transformedMessages: ChatgptMessage[] =
         messageTransformMockData.baseMessages.map((message: any) =>
           generatedTransformerFunction(

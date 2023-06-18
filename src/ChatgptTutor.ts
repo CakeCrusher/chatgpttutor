@@ -28,6 +28,12 @@ export class ChatgptTutor extends OpenaiAbstraction {
       openaiApiKey,
       collectionName
     );
+    const metadata = this.vectorDb.courseCollection.metadata;
+    if (metadata && metadata.generatedTransformerObjectString) {
+      this.chatTransformer = generatedMessageTransformerParser(
+        metadata.generatedTransformerObjectString
+      ).parsedFunction;
+    }
   }
 
   async generateResponse(
@@ -99,6 +105,14 @@ export class ChatgptTutor extends OpenaiAbstraction {
       const parsedMessageTransformer = generatedMessageTransformerParser(
         completion.data.choices[0].message.function_call.arguments
       );
+
+      await this.vectorDb?.courseCollection.modify({
+        metadata: {
+          ...this.vectorDb?.courseCollection.metadata,
+          generatedTransformerObjectString:
+            completion.data.choices[0].message.function_call.arguments,
+        },
+      });
 
       this.chatTransformer = parsedMessageTransformer.parsedFunction;
 
